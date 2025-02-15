@@ -7,8 +7,8 @@ interface UserAttributes {
     email: string;
     password: string;
     token: string;
-    rol: EnumDataType<'Client' | 'Admin' | 'Shipper'>;
-    adress: string;
+    rol: 'Client' | 'Admin' | 'Shipper';
+    address: string;
     longitud: number;
     latitud: number;
     createdAt: Date;
@@ -21,8 +21,8 @@ export default class User extends Model<UserAttributes> implements UserAttribute
     email!: string;
     password!: string;
     token!: string;
-    rol!: EnumDataType<'Client' | 'Admin' | 'Shipper'>;
-    adress!: string;
+    rol!: 'Client' | 'Admin' | 'Shipper';
+    address!: string;
     longitud!: number;
     latitud!: number;
     createdAt!: Date;
@@ -50,13 +50,13 @@ User.init({
     },
     token: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     rol: {
         type: DataTypes.ENUM('Client', 'Admin', 'Shipper'),
         allowNull: false
     },
-    adress: {
+    address: {
         type: DataTypes.STRING,
         allowNull: false
     },
