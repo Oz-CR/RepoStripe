@@ -1,0 +1,10 @@
+{
+    "development": {
+      "database": "bd_stripe_maps",
+      "username": "root",
+      "password": "MA3ERTUI",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "dialect": "mysql"
+    }
+  }

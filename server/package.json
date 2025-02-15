@@ -3,7 +3,16 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.ts",
+    "dev": "nodemon index.ts",
+    "build": "tsc",
+    "migrate": "cd ./database && npx sequelize-cli db:migrate",
+    "create:migration": "cd ./database && npx sequelize-cli migration:generate --name",
+    "create:seed": "cd ./database && npx sequelize-cli seed:generate --name",
+    "migrate:undo": "cd ./database && npx sequelize-cli db:migrate:undo",
+    "seed:undo": "cd ./database && npx sequelize-cli db:seed:undo",
+    "seed:all": "cd ./database && npx sequelize-cli db:seed:all"
   },
   "author": "",
   "license": "ISC",
