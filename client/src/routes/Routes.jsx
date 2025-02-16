@@ -10,6 +10,7 @@ import LandingPage from '../pages/LandingPage'
 import Products from '../pages/Products'
 import Cart from '../pages/Cart'
 import Payment from '../pages/Payment'
+import NewRepartidor from '../pages/NewRepartidor'
 
 const AppRoutes = () => {
   return (
@@ -23,6 +24,7 @@ const AppRoutes = () => {
         <Route path='/products' element={<Products />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/payment' element={<Payment />} />
+        <Route path='/newrepartidor' element={<NewRepartidor />} />
       </Routes>
   )
 }
