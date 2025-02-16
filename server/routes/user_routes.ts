@@ -2,6 +2,8 @@ import * as Express from 'express'
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Echo } from 'twilio/lib/twiml/VoiceResponse';
+import { authenticateJWT, authorizeAdmin, authorizeShipper } from '../routes/authMiddleware';
+
 require('dotenv').config();
 
 const router = Express.Router();
@@ -134,6 +136,22 @@ router.get('/see/products', async (req, res) => {
         } else {
             res.status(400).json({ error: 'No products found' });
         }
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+})
+
+router.post('/create/product', authenticateJWT, authorizeAdmin, async (req, res) => {
+    const { product_name, product_description, product_price } = req.body;
+    try {
+        const product = await Product.create({
+            product_name,
+            product_description,
+            product_price,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+        res.status(201).json({ product });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
