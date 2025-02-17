@@ -22,11 +22,12 @@ const Login = () => {
     e.preventDefault(); 
 
     try {
-      const res = await axios.post('http://localhost:3001/v0.0.1/api/login', formData, {
+      const res = await axios.post('http://localhost:3000/v0.0.1/api/login', formData, {
         headers: {
           "Content-Type": "application/json"
         }
       });
+            localStorage.setItem('token', res.data.token);
 
       console.log(res.data); 
       navigate('/dashclient'); 

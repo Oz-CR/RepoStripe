@@ -3,13 +3,12 @@ import axios from "axios";
 import { useState } from "react";
 import "../styles/login.css";
 
-const NewRepartidor = () => {
+const NewProduct = () => {
 
     const [formData, setFormData] = useState({
-      name: '',
-      email: '',
-      password: '',
-      address: '',
+      product_name: '',
+      product_description: '',
+      product_price: '',
     })
 
   const handleChange = (e) => {
@@ -21,7 +20,7 @@ const NewRepartidor = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    axios.post('http://localhost:3000/v0.0.1/api/register/shipper', formData)
+    axios.post('http://localhost:3000/v0.0.1/api/create/product', formData)
       .then(res => {
         console.log(res.data)
       })
@@ -44,10 +43,10 @@ const NewRepartidor = () => {
       <h1 className="logo">misteba</h1>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <input type="email" placeholder="EMAIL ADDRESS"  onChange={handleChange} name="email" value={formData.email} />
-        <input type="password" placeholder="PASSWORD" onChange={handleChange} name="password" value={formData.password} />
-        <input type="text" placeholder="ADDRESS" onChange={handleChange} name="address" value={formData.address} />
-        <button type="submit">REGITER SHIPPER</button>
+        <input type="text" placeholder="PRODUCT NAME" onChange={handleChange} name="product_name" value={formData.product_name} />
+        <input type="text" placeholder="PRODUCT DESCRIPTION" onChange={handleChange} name="product_description" value={formData.product_description} />
+        <input type="text" placeholder="PRODUCT PRICE" onChange={handleChange} name="product_price" value={formData.product_price} />
+        <button type="submit">REGITER PRODUCT</button>
       </form>
 
       
@@ -56,4 +55,4 @@ const NewRepartidor = () => {
   );
 };
 
-export default NewRepartidor;
+export default NewProduct;
