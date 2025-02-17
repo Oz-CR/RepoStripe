@@ -141,7 +141,7 @@ router.get('/see/products', async (req, res) => {
     }
 })
 
-router.post('/create/product', authenticateJWT, authorizeAdmin, async (req, res) => {
+router.post('/create/product', async (req, res) => {
     const { product_name, product_description, product_price } = req.body;
     try {
         const product = await Product.create({
