@@ -11,6 +11,7 @@ import Products from '../pages/Products'
 import Cart from '../pages/Cart'
 import Payment from '../pages/Payment'
 import NewRepartidor from '../pages/NewRepartidor'
+import NewProduct from '../pages/NewProduct'
 
 const AppRoutes = () => {
   return (
@@ -25,6 +26,7 @@ const AppRoutes = () => {
         <Route path='/cart' element={<Cart />} />
         <Route path='/payment' element={<Payment />} />
         <Route path='/newrepartidor' element={<NewRepartidor />} />
+        <Route path='/newproduct' element={<NewProduct />} />
       </Routes>
   )
 }
