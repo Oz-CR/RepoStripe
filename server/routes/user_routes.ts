@@ -2,7 +2,7 @@ import * as Express from 'express'
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Echo } from 'twilio/lib/twiml/VoiceResponse';
-import { authenticateJWT, authorizeAdmin, authorizeShipper } from '../routes/authMiddleware';
+import { authenticateJWT, authorizeAdmin, authorizeShipper, authorizeClient } from '../routes/authMiddleware';
 
 require('dotenv').config();
 
@@ -155,6 +155,47 @@ router.post('/create/product', authenticateJWT, authorizeAdmin, async (req, res)
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
+})
+
+router.post('/create/order', authenticateJWT, authorizeClient, async (req, res) => {
+    const { user_id, shipper_id, product_id, product_quantity, subtotal_price } = req.body;
+    try {
+        const order = await Order.create({
+            user_id,
+            shipper_id,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        })
+
+        const order_detail = await OrderDetail.create({
+            order_id:  order.id,
+            product_id, 
+            product_quantity, 
+            subtotal_price,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        })
+
+        res.status(201).json({ 'Orden creada con exito': order, order_detail })
+    }catch(error){
+        res.status(400).json({ error: error.message })
+    }
+})
+
+router.post('/add-to-cart', authenticateJWT, authorizeClient, async (req, res) => {
+    const {order_id, product_id, product_quantity, subtotal_price} = req.body;
+    try {
+        const order_detail = await OrderDetail.create({
+            order_id,
+            product_id,
+            product_quantity,
+            subtotal_price
+        })
+
+        res.status(201).json({ 'Producto anadido al carrito': order_detail })
+    } catch(error) {
+        res.status(400).json({ error: error.message })
+    } 
 })
 
 export default router;

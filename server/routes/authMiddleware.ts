@@ -29,6 +29,13 @@ export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunct
     }
 };
 
+export const authorizeClient = (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (req.user?.rol !== 'Client') {
+        res.status(403).json({error: 'Access denied, only the client is authorized'})
+        return
+    }
+    next();
+}
 export const authorizeAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
     if (req.user?.rol !== 'Admin') {
         res.status(403).json({ error: 'Access denied, only admins are authorized' });

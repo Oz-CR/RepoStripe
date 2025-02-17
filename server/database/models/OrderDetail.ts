@@ -5,7 +5,7 @@ interface OrderDetailAttributes {
     id: number;
     order_id: number;
     product_id: number;
-    prduct_quantity: number;
+    product_quantity: number;
     subtotal_price: DecimalDataType;
     createdAt: Date;
     updatedAt: Date;
@@ -15,7 +15,7 @@ export default class OrderDetail extends Model<OrderDetailAttributes> implements
     id!: number;
     order_id!: number;
     product_id!: number;
-    prduct_quantity!: number;
+    product_quantity!: number;
     subtotal_price!: DecimalDataType;
     createdAt!: Date;
     updatedAt!: Date;
@@ -35,7 +35,7 @@ OrderDetail.init({
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    prduct_quantity: {
+    product_quantity: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
