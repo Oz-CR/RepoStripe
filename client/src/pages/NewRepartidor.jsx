@@ -21,7 +21,7 @@ const NewRepartidor = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    axios.post('http://localhost:3000/v0.0.1/api/register/shipper', formData)
+    axios.post('http://localhost:3001/v0.0.1/api/register/shipper', formData)
       .then(res => {
         console.log(res.data)
       })
