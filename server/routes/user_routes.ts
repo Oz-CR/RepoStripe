@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
     }
 })
 
-router.post('/register/shipper', async (req, res) => {
+router.post('/register/shipper', authenticateJWT, authorizeAdmin, async (req, res) => {
     const { name, email, password, address } = req.body;
     try {
         const existingUser = await User.findOne({where : {email: email}});
@@ -74,7 +74,7 @@ router.post('/register/shipper', async (req, res) => {
     }
 });
 
-router.post('/register/admin', async (req, res) => {
+router.post('/register/admin', authenticateJWT, authorizeAdmin, async (req, res) => {
     const { name, email, password, address } = req.body;
     try {
         const existingUser = await User.findOne({where : {email: email}});
