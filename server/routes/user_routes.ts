@@ -198,4 +198,36 @@ router.post('/add-to-cart', authenticateJWT, authorizeClient, async (req, res) =
     } 
 })
 
+router.post('/send/order', async (req, res) => {
+    const { order_id } = req.body;
+    try {
+        const order = await Order.findByPk(order_id);
+        if (order) {
+            order.order_state = 'In Delivery';
+            await order.save();
+            res.status(200).json({ 'Order sent': order });
+        } else {
+            res.status(400).json({ error: 'Order not found' });
+        }
+    } catch(error) {
+        res.status(400).json({ error: error.message })
+    }
+})
+
+router.post('/order/cancel', async (req, res) => {
+    const { order_id } = req.body;
+    try {
+        const order = await Order.findByPk(order_id);
+        if (order) {
+            order.order_state = 'Cancelled';
+            await order.save();
+            res.status(200).json({ 'Order cancelled': order });
+        } else {
+            res.status(400).json({ error: 'Order not found' });
+        }
+    } catch(error) {
+        res.status(400).json({ error: error.message })
+    }
+})
+
 export default router;

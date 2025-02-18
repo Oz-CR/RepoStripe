@@ -6,7 +6,7 @@ interface OrderAttributes {
     user_id: number;
     shipper_id: number;
     total_price: DecimalDataType;
-    order_state: EnumDataType<'Pendant' | 'In Delivery' | 'Cancelled'>;
+    order_state: 'Pendant' | 'In Delivery' | 'Cancelled';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -16,7 +16,7 @@ export default class Order extends Model<OrderAttributes> implements OrderAttrib
     user_id!: number;
     shipper_id!: number;
     total_price!: DecimalDataType;
-    order_state!: EnumDataType<'Pendant' | 'In Delivery' | 'Cancelled'>;
+    order_state!: 'Pendant' | 'In Delivery' | 'Cancelled';
     createdAt!: Date;
     updatedAt!: Date;
 }
