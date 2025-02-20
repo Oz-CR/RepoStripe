@@ -35,7 +35,8 @@ export const authorizeClient = (req: AuthRequest, res: Response, next: NextFunct
         return
     }
     next();
-}
+};
+
 export const authorizeAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
     if (req.user?.rol !== 'Admin') {
         res.status(403).json({ error: 'Access denied, only admins are authorized' });

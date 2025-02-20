@@ -6,7 +6,7 @@ interface OrderDetailAttributes {
     order_id: number;
     product_id: number;
     product_quantity: number;
-    subtotal_price: DecimalDataType;
+    subtotal_price: number | string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -16,7 +16,7 @@ export default class OrderDetail extends Model<OrderDetailAttributes> implements
     order_id!: number;
     product_id!: number;
     product_quantity!: number;
-    subtotal_price!: DecimalDataType;
+    subtotal_price!: number | string;
     createdAt!: Date;
     updatedAt!: Date;
 }

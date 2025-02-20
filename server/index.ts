@@ -1,7 +1,8 @@
 require ('dotenv').config()
 import express from 'express'
 import router from './routes/user_routes'
-const cors = require('cors')
+import cors from 'cors'
+
 const app = express()
 
 app.use(cors({
@@ -17,4 +18,4 @@ const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log('Ctrl + C para cerrar')
     console.log(`App escuchando en el puerto ${PORT}`)
-})
+});

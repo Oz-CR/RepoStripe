@@ -3,8 +3,11 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Echo } from 'twilio/lib/twiml/VoiceResponse';
 import { authenticateJWT, authorizeAdmin, authorizeShipper, authorizeClient } from '../routes/authMiddleware';
+import Stripe from 'stripe';
 
 require('dotenv').config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const router = Express.Router();
 
@@ -157,76 +160,97 @@ router.post('/create/product', async (req, res) => {
     }
 })
 
-router.post('/create/order', authenticateJWT, authorizeClient, async (req, res) => {
-    const { user_id, shipper_id, product_id, product_quantity, subtotal_price } = req.body;
+router.post('/stripe/create/payment', async(req, res) => {
     try {
-        const order = await Order.create({
-            user_id,
-            shipper_id,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        })
+        const { cart, user_id, shipper_id } = req.body;
 
-        const order_detail = await OrderDetail.create({
-            order_id:  order.id,
-            product_id, 
-            product_quantity, 
-            subtotal_price,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        })
+        const totalAmount = cart.reduce((acc, item) => acc + item.product_price * item.quantity, 0);
 
-        res.status(201).json({ 'Orden creada con exito': order, order_detail })
-    }catch(error){
-        res.status(400).json({ error: error.message })
+        const user = await User.findByPk(user_id);
+        const shipper = await User.findByPk(shipper_id);
+
+        if (user && shipper) {
+            const order = await Order.create({
+                user_id,
+                shipper_id,
+                total_price: totalAmount,
+                order_state: 'Pendant',
+                createdAt: new Date(),
+                updatedAt: new Date()
+            })
+
+            for (const item of cart) {
+                const order_detail = await OrderDetail.create({
+                    order_id:  order.id,
+                    product_id: item.product_id, 
+                    product_quantity: item.quantity, 
+                    subtotal_price: item.product_price * item.quantity,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                })
+            }
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: totalAmount * 100,
+                currency: 'MXN',
+                metadata: {
+                    order_id: order.id
+                }
+            })
+
+            res.status(201).json({ 'Orden creada con exito': order, paymentIntent})
+        }
+    } catch(error) {
+        res.status(400).json({ error: error.message });
     }
 })
 
-router.post('/add-to-cart', authenticateJWT, authorizeClient, async (req, res) => {
-    const {order_id, product_id, product_quantity, subtotal_price} = req.body;
+router.post('/confirm/payment', async (req, res) => {
     try {
-        const order_detail = await OrderDetail.create({
-            order_id,
-            product_id,
-            product_quantity,
-            subtotal_price
-        })
+        const {order_id, payment_intent_id} = req.body;
+        
+        const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
 
-        res.status(201).json({ 'Producto anadido al carrito': order_detail })
-    } catch(error) {
-        res.status(400).json({ error: error.message })
-    } 
-})
-
-router.post('/send/order', async (req, res) => {
-    const { order_id } = req.body;
-    try {
-        const order = await Order.findByPk(order_id);
-        if (order) {
+        if (paymentIntent.status === 'succeeded') {
+            const order = await Order.findByPk(order_id);
             order.order_state = 'In Delivery';
             await order.save();
+
             res.status(200).json({ 'Order sent': order });
         } else {
-            res.status(400).json({ error: 'Order not found' });
+            res.status(400).json({ error: 'Payment not confirmed' });
         }
-    } catch(error) {
-        res.status(400).json({ error: error.message })
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 })
 
-router.post('/order/cancel', async (req, res) => {
-    const { order_id } = req.body;
+router.post('/cancel/order', async (req, res) => {
     try {
+        const { order_id, payment_intent_id } = req.body;
+
         const order = await Order.findByPk(order_id);
-        if (order) {
-            order.order_state = 'Cancelled';
-            await order.save();
-            res.status(200).json({ 'Order cancelled': order });
+        if (order.order_state !== 'Cancelled') {
+            const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
+            if (paymentIntent.status === 'succeeded') {
+                order.order_state = 'Cancelled';
+                await order.save();
+
+                const refund = await stripe.refunds.create({
+                    payment_intent: paymentIntent.id
+                })
+
+                res.status(200).json({ 'Order cancelled': order, refund });
+            } else {
+                order.order_state = 'Cancelled';
+                await order.save();
+                res.status(200).json({ 'Order cancelled': order });
+            }
         } else {
-            res.status(400).json({ error: 'Order not found' });
+            res.status(400).json({ error: 'Order already cancelled' });
         }
-    } catch(error) {
-        res.status(400).json({ error: error.message })
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 })
 
