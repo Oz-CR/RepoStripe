@@ -5,14 +5,12 @@ import '../styles/header.css'
 const navItems = [
     { name: 'Login', path: '/login' },
     { name: 'Register', path: '/register' },
-    { name: 'Verify', path: '/verify' },
     { name: 'Thanks', path: '/thanks' },
     { name: 'DashClient', path: '/dashclient' },
     { name: 'LandingPage', path: '/landingpage' },
     { name: 'Products', path: '/products' },
     { name: 'Cart', path: '/cart' },
     { name: 'NewRepartidor', path: '/newrepartidor' },
-    { name: 'Payment', path: '/payment' },
     {name: 'NewProduct', path: '/newproduct'},
     {name: 'Checkout', path: '/checkout'},
 ]
