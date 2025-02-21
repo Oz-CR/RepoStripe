@@ -25,7 +25,7 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    axios.post('http://localhost:3000/v0.0.1/api/register', formData)
+    axios.post('http://localhost:3005/v0.0.1/api/register', formData)
       .then(res => {
         navigate('/login')
       })

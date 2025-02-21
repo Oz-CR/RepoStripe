@@ -20,7 +20,7 @@ const NewProduct = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    axios.post('http://localhost:3000/v0.0.1/api/create/product', formData)
+    axios.post('http://localhost:3005/v0.0.1/api/create/product', formData)
       .then(res => {
         console.log(res.data)
       })
