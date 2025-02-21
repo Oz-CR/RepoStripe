@@ -5,7 +5,7 @@ interface OrderAttributes {
     id: number;
     user_id: number;
     shipper_id: number;
-    total_price: DecimalDataType;
+    total_price: number | string
     order_state: 'Pendant' | 'In Delivery' | 'Cancelled';
     createdAt: Date;
     updatedAt: Date;
@@ -15,7 +15,7 @@ export default class Order extends Model<OrderAttributes> implements OrderAttrib
     id!: number;
     user_id!: number;
     shipper_id!: number;
-    total_price!: DecimalDataType;
+    total_price!: number | string;
     order_state!: 'Pendant' | 'In Delivery' | 'Cancelled';
     createdAt!: Date;
     updatedAt!: Date;

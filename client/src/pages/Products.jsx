@@ -7,7 +7,7 @@ const Products = () => {
 
   useEffect(() => {
 
-    axios.get('http://localhost:3000/v0.0.1/api/see/products')
+    axios.get('http://localhost:3002/v0.0.1/api/see/products')
       .then(res => {
         setProducts(res.data.products);
       })
@@ -20,17 +20,17 @@ const Products = () => {
   const addToCart = (product) => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    const existingProductIndex = cart.findIndex(item => item.id === product.id);
-    
+    const existingProductIndex = cart.findIndex(item => item.product_id === product.product_id); // Cambiado a product_id
+
     if (existingProductIndex !== -1) {
-      cart[existingProductIndex].quantity += 1;
+        cart[existingProductIndex].quantity += 1;
     } else {
-      cart.push({ ...product, quantity: 1 });
+        cart.push({ ...product, quantity: 1 });
     }
 
     localStorage.setItem("cart", JSON.stringify(cart));
     alert(`${product.product_name} agregado al carrito`);
-  };
+};
 
 
   return (

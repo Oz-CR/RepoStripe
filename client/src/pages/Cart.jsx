@@ -1,9 +1,17 @@
 "use client"
 import { useEffect, useState } from "react"
 import "../styles/cart.css"
+import { useNavigate } from "react-router-dom"
 
 const Cart = () => {
   const [cart, setCart] = useState([])
+
+  const navigate = useNavigate()
+
+  const HandleCheckout = () => {
+    navigate('/checkout', { state: { cart } });
+  };
+  
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || []
@@ -59,7 +67,7 @@ const Cart = () => {
           ))}
         </ul>
       )}
-      <button >Realizar Orden</button>
+      <button onClick={HandleCheckout}>Realizar Orden</button>
 
     </div>
   )

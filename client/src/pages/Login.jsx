@@ -22,14 +22,20 @@ const Login = () => {
     e.preventDefault(); 
 
     try {
-      const res = await axios.post('http://localhost:3000/v0.0.1/api/login', formData, {
+      const res = await axios.post('http://localhost:3002/v0.0.1/api/login', formData, {
         headers: {
           "Content-Type": "application/json"
         }
       });
-            localStorage.setItem('token', res.data.token);
-
-      console.log(res.data); 
+            
+      if (res.data && res.data.id) {
+        // Guarda el ID en localStorage
+        localStorage.setItem('id', res.data.id);
+        console.log('ID guardado en localStorage:', res.data.id);
+    } else {
+        console.error('La respuesta del servidor no contiene un ID.');
+    }
+    
       navigate('/dashclient'); 
 
     } catch (err) {
