@@ -1,9 +1,10 @@
 import * as Express from 'express'
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Echo } from 'twilio/lib/twiml/VoiceResponse';
 import { authenticateJWT, authorizeAdmin, authorizeShipper, authorizeClient } from '../routes/authMiddleware';
 import Stripe from 'stripe';
+
+const axios = require('axios')
 
 require('dotenv').config();
 
@@ -17,6 +18,29 @@ import Product from '../database/models/Product';
 import OrderDetail from '../database/models/OrderDetail';
 import Payment from '../database/models/Payment';
 
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_SECRET_KEY;
+
+async function getCoordinates(address) {
+    try {
+        const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+            params: {
+                address: address,
+                key: GOOGLE_MAPS_API_KEY
+            }
+        });
+
+        if (response.data.status === 'OK') {
+            const location = response.data.results[0].geometry.location;
+            return { latitud: location.lat, longitud: location.lng };
+        } else {
+            throw new Error('No se pudo obtener coordenadas para' + address);
+        }
+    } catch (error) {
+        console.error('Error en geocoding:', error.message);
+        return { latitud: 0, longitud: 0 }; // Valores por defecto en caso de error
+    }
+}
+
 router.get('/', (req, res) => {
     res.send("Hola mundo");
 })
@@ -27,6 +51,9 @@ router.post('/register', async (req, res) => {
         const existingUser = await User.findOne({where : {email: email}});
 
         if (!existingUser) {
+
+            const { latitud, longitud } = await getCoordinates(address);
+
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = await User.create({
                 name,
@@ -34,13 +61,13 @@ router.post('/register', async (req, res) => {
                 password: hashedPassword,
                 rol: 'Client',
                 address,
-                longitud: 0,
-                latitud: 0,
+                longitud: longitud,
+                latitud: latitud,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
 
-            res.status(201).json({ user });
+            res.status(201).json({ user, longitud, latitud });
         } else {
             res.status(400).json({ error: 'User already exists' });
         }
@@ -55,6 +82,9 @@ router.post('/register/shipper', authenticateJWT, authorizeAdmin, async (req, re
         const existingUser = await User.findOne({where : {email: email}});
 
         if (!existingUser) {
+
+            const { latitud, longitud } = await getCoordinates(address);
+
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = await User.create({
                 name,
@@ -62,8 +92,8 @@ router.post('/register/shipper', authenticateJWT, authorizeAdmin, async (req, re
                 password: hashedPassword,
                 rol: 'Shipper',
                 address,
-                longitud: 0,
-                latitud: 0,
+                longitud: longitud,
+                latitud: latitud,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -83,6 +113,9 @@ router.post('/register/admin', authenticateJWT, authorizeAdmin, async (req, res)
         const existingUser = await User.findOne({where : {email: email}});
 
         if (!existingUser) {
+
+            const { latitud, longitud } = await getCoordinates(address);
+
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = await User.create({
                 name,
@@ -90,8 +123,8 @@ router.post('/register/admin', authenticateJWT, authorizeAdmin, async (req, res)
                 password: hashedPassword,
                 rol: 'Admin',
                 address,
-                longitud: 0,
-                latitud: 0,
+                longitud: longitud,
+                latitud: latitud,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -119,7 +152,7 @@ router.post('/login', async (req, res) => {
                 user.token = token;
                 await user.save();
 
-                res.status(200).json({ 'User token': token });
+                res.status(200).json({ 'User token': token, latitud: user.latitud, longitud: user.longitud });
             } else {
                 res.status(400).json({ error: 'Incorrect password' });
             }
