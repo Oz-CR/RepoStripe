@@ -11,7 +11,7 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.use(express.json())
+app.use(express.json());
 app.use('/v0.0.1/api', router)
 
 const PORT = process.env.PORT

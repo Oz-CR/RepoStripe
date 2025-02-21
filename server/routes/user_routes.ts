@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { authenticateJWT, authorizeAdmin, authorizeShipper, authorizeClient } from '../routes/authMiddleware';
 import Stripe from 'stripe';
+import { Request, Response, Router } from 'express';
+
 
 const axios = require('axios')
 
@@ -152,7 +154,7 @@ router.post('/login', async (req, res) => {
                 user.token = token;
                 await user.save();
 
-                res.status(200).json({ 'User token': token, latitud: user.latitud, longitud: user.longitud });
+                res.status(200).json({ id: user.id, token: token, latitud: user.latitud, longitud: user.longitud });
             } else {
                 res.status(400).json({ error: 'Incorrect password' });
             }
@@ -162,7 +164,8 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
-})
+});
+
 
 router.get('/see/products', async (req, res) => {
     try {
@@ -177,7 +180,7 @@ router.get('/see/products', async (req, res) => {
     }
 })
 
-router.post('/create/product', async (req, res) => {
+router.post('/create/product', authenticateJWT, authorizeAdmin, async (req, res) => {
     const { product_name, product_description, product_price } = req.body;
     try {
         const product = await Product.create({
@@ -193,70 +196,90 @@ router.post('/create/product', async (req, res) => {
     }
 })
 
-router.post('/stripe/create/payment', async(req, res) => {
+router.post('/stripe/create/payment', async (req, res) => {
     try {
         const { cart, user_id, shipper_id } = req.body;
 
         const totalAmount = cart.reduce((acc, item) => acc + item.product_price * item.quantity, 0);
+        const minAmount = 10;
+
+        if (totalAmount < minAmount) {
+            res.status(400).json({ error: `El monto mínimo de pago es de $${minAmount} MXN.` });
+            return;
+        }
 
         const user = await User.findByPk(user_id);
         const shipper = await User.findByPk(shipper_id);
 
-        if (user && shipper) {
-            const order = await Order.create({
-                user_id,
-                shipper_id,
-                total_price: totalAmount,
-                order_state: 'Pendant',
-                createdAt: new Date(),
-                updatedAt: new Date()
-            })
+        if (!user || !shipper) {
+            res.status(404).json({ error: 'Usuario o repartidor no encontrado' });
+            return;
+        }
 
-            for (const item of cart) {
-                const order_detail = await OrderDetail.create({
-                    order_id:  order.id,
-                    product_id: item.product_id, 
-                    product_quantity: item.quantity, 
+        const order = await Order.create({
+            user_id,
+            shipper_id,
+            total_price: totalAmount,
+            order_state: 'Pendant',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        for (const item of cart) {
+            if (item.id) {
+                await OrderDetail.create({
+                    order_id: order.id,
+                    product_id: item.id,
+                    product_quantity: item.quantity,
                     subtotal_price: item.product_price * item.quantity,
                     createdAt: new Date(),
                     updatedAt: new Date()
-                })
+                });
+            } else {
+                console.error("Falta id para el artículo:", item);
+                // Opcionalmente, manejar el error, p. ej., devolver un error al frontend
             }
-
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: totalAmount * 100,
-                currency: 'MXN',
-                metadata: {
-                    order_id: order.id
-                }
-            })
-
-            res.status(201).json({ 'Orden creada con exito': order, paymentIntent})
         }
-    } catch(error) {
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(totalAmount * 100),
+            currency: 'MXN',
+            payment_method_types: ['card'],
+            metadata: { order_id: order.id }
+        });
+
+        res.status(201).json({ message: 'Orden creada con éxito', order, paymentIntent });
+    } catch (error) {
         res.status(400).json({ error: error.message });
     }
-})
+});
 
 router.post('/confirm/payment', async (req, res) => {
     try {
-        const {order_id, payment_intent_id} = req.body;
-        
+        const { order_id, payment_intent_id } = req.body;
         const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
 
         if (paymentIntent.status === 'succeeded') {
             const order = await Order.findByPk(order_id);
-            order.order_state = 'In Delivery';
-            await order.save();
 
-            res.status(200).json({ 'Order sent': order });
+            if (order) {
+                order.order_state = 'In Delivery';
+                await order.save();
+                 res.status(200).json({ message: "Pago confirmado y orden actualizada" });
+                 return;
+            } else {
+                 res.status(404).json({ error: "Orden no encontrada" });
+                 return;
+            }
         } else {
-            res.status(400).json({ error: 'Payment not confirmed' });
+             res.status(400).json({ error: "Pago no confirmado" });
+             return;
         }
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
-})
+});
+
 
 router.post('/cancel/order', async (req, res) => {
     try {

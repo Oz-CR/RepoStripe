@@ -13,7 +13,8 @@ const navItems = [
     { name: 'Cart', path: '/cart' },
     { name: 'NewRepartidor', path: '/newrepartidor' },
     { name: 'Payment', path: '/payment' },
-    {name: 'NewProduct', path: '/newproduct'}
+    {name: 'NewProduct', path: '/newproduct'},
+    {name: 'Checkout', path: '/checkout'},
 ]
 
 const Header = () => {

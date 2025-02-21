@@ -13,6 +13,11 @@ const Thanks = () => {
         Volver a la página de inicio
         </NavLink>
         </a>
+        <a href="/" className="button">
+        <NavLink to="/map">
+        Ver seguimiento del producto
+        </NavLink>
+        </a>
       </main>
     </div>
   )

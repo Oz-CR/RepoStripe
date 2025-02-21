@@ -12,10 +12,11 @@ import Cart from '../pages/Cart';
 import Payment from '../pages/Payment';
 import NewRepartidor from '../pages/NewRepartidor';
 import NewProduct from '../pages/NewProduct';
+import Checkout from '../pages/Checkout';
 
 // Componente ProtectedRoute
 const ProtectedRoute = ({ children }) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('id');
     return token ? children : <Navigate to="/login" />; // Usa Navigate para redirigir
 };
 
@@ -57,6 +58,11 @@ const AppRoutes = () => {
             <Route path="/newproduct" element={
                 <ProtectedRoute>
                     <NewProduct />
+                </ProtectedRoute>
+            } />
+            <Route path="/checkout" element={
+                <ProtectedRoute>
+                    <Checkout />
                 </ProtectedRoute>
             } />
 
