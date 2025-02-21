@@ -172,15 +172,15 @@ router.post('/stripe/create/payment', async (req, res) => {
         const minAmount = 10;
 
         if (totalAmount < minAmount) {
-             res.status(400).json({ error: `El monto mínimo de pago es de $${minAmount} MXN.` });
-             return;
+            res.status(400).json({ error: `El monto mínimo de pago es de $${minAmount} MXN.` });
+            return;
         }
 
         const user = await User.findByPk(user_id);
         const shipper = await User.findByPk(shipper_id);
 
         if (!user || !shipper) {
-             res.status(404).json({ error: 'Usuario o repartidor no encontrado' });
+            res.status(404).json({ error: 'Usuario o repartidor no encontrado' });
             return;
         }
 
@@ -194,14 +194,19 @@ router.post('/stripe/create/payment', async (req, res) => {
         });
 
         for (const item of cart) {
-            await OrderDetail.create({
-                order_id: order.id,
-                product_id: item.product_id,
-                product_quantity: item.quantity,
-                subtotal_price: item.product_price * item.quantity,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            });
+            if (item.id) {
+                await OrderDetail.create({
+                    order_id: order.id,
+                    product_id: item.id,
+                    product_quantity: item.quantity,
+                    subtotal_price: item.product_price * item.quantity,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+            } else {
+                console.error("Falta id para el artículo:", item);
+                // Opcionalmente, manejar el error, p. ej., devolver un error al frontend
+            }
         }
 
         const paymentIntent = await stripe.paymentIntents.create({
