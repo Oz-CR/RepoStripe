@@ -20,7 +20,15 @@ const NewProduct = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    axios.post('http://localhost:3005/v0.0.1/api/create/product', formData)
+
+    const token = localStorage.getItem('token')
+
+    axios.post('http://localhost:3005/v0.0.1/api/create/product', formData, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    })
       .then(res => {
         console.log(res.data)
       })

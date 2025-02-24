@@ -28,10 +28,11 @@ const Login = () => {
         }
       });
       const token = res.data.token;
+      
+      localStorage.setItem('token', token)
       localStorage.setItem('id', res.data.id);
-
-        localStorage.setItem('latitud', res.data.latitud);
-        localStorage.setItem('longitud', res.data.longitud);
+      localStorage.setItem('latitud', res.data.latitud);
+      localStorage.setItem('longitud', res.data.longitud);
 
       console.log("Login exitoso", res.data);
       navigate('/dashclient'); 

@@ -1,7 +1,7 @@
 import React from "react";
 import UserMap from "../components/Map";
 
-const DashClient = () => {
+const Map = () => {
   return (
     <div>
       <h2>Ubicación del Usuario</h2>
@@ -10,4 +10,4 @@ const DashClient = () => {
   );
 };
 
-export default DashClient;
+export default Map;

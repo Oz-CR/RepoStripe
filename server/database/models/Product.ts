@@ -6,6 +6,9 @@ interface ProductAttributes {
     product_name: string;
     product_description: string;
     product_price: DecimalDataType;
+    address: string;
+    latitud: number;
+    longitud: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -15,6 +18,9 @@ export default class Product extends Model<ProductAttributes> implements Product
     product_name!: string;
     product_description!: string;
     product_price!: DecimalDataType;
+    address: string;
+    latitud: number;
+    longitud: number;
     createdAt!: Date;
     updatedAt!: Date;
 }
@@ -35,6 +41,18 @@ Product.init({
     },
     product_price: {
         type: DataTypes.DECIMAL(10, 2),
+        allowNull: false
+    },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    latitud: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
+    longitud: {
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     createdAt: {
